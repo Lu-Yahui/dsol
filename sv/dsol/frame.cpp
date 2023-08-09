@@ -51,6 +51,11 @@ void Frame::SetGrays(const ImagePyramid& grays_l, const ImagePyramid& grays_r) {
   }
 }
 
+void Frame::SetColors(const cv::Mat& color_l, const cv::Mat& color_r) {
+  color_l_ = color_l;
+  color_r_ = color_r;
+}
+
 cv::Size Frame::image_size() const noexcept {
   if (empty()) return {};
   const auto& img0 = grays_l_.at(0);
@@ -119,6 +124,9 @@ void Keyframe::SetFrame(const Frame& frame) noexcept {
   if (frame.is_stereo()) {
     CopyImagePyramid(frame.grays_r(), grays_r_);
   }
+
+  color_l_ = frame.color_l();
+  color_r_ = frame.color_r();
 }
 
 int Keyframe::InitPoints(const PixelGrid& pixels, const Camera& camera) {

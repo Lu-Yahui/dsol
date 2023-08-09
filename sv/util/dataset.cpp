@@ -600,6 +600,38 @@ KittiOdom::KittiOdom(const std::string& data_dir)
   data_[DataType::kPose] = ConvertPoses(raw_poses);
 }
 
+KittiOdom::KittiOdom(const std::string& data_dir,
+                     const std::string& left_image_sub_dir,
+                     const std::string& right_image_sub_dir,
+                     const std::string& calib_sub_dir,
+                     const std::string& pose_dir,
+                     const std::string& time_dir)
+    : DatasetBase{"kitti", data_dir, kDtypes} {
+  const fs::path data_path{data_dir_};
+  const auto image_stereo = ReadStereoData(data_path / left_image_sub_dir,
+                                           data_path / right_image_sub_dir,
+                                           ".png",
+                                           files_[DataType::kImage]);
+
+  const auto image_size = static_cast<int>(files_.at(DataType::kImage).size());
+  size_ = image_stereo ? image_size / 2 : image_size;
+
+  // Intrinsics
+  data_[DataType::kIntrin] = ReadIntrinsics(data_path / calib_sub_dir);
+
+  // Extrinsics (GT poses)
+  const fs::path pose_path{pose_dir};
+  const cv::Mat raw_poses =
+      ReadPoses(pose_path / (data_path.stem().string() + ".txt"));
+  CHECK_EQ(size_, raw_poses.rows);
+  data_[DataType::kPose] = ConvertPoses(raw_poses);
+
+  // timestamp
+  const fs::path time_path{time_dir};
+  data_[DataType::kTime] =
+      ReadTimes(time_path / (data_path.stem().string() + "/times.txt"));
+}
+
 KittiOdom KittiOdom::Create(const std::string& base_dir, int seq) {
   return KittiOdom{fmt::format("{}/sequences/{:02d}", base_dir, seq)};
 }
@@ -633,6 +665,11 @@ cv::Mat KittiOdom::GetImpl(std::string_view dtype, int i, int cam) const {
     return pose;
   }
 
+  if (dtype == DataType::kTime) {
+    auto timestamp = data_.at(DataType::kTime).row(i).clone();
+    return timestamp;
+  }
+
   return {};
 }
 
@@ -661,6 +698,24 @@ cv::Mat KittiOdom::ReadIntrinsics(const std::string& file) {
   baseline_ = -data[3] / data[0];
   std::vector<double> intrin{data[0], data[5], data[2], data[6], baseline_};
   return cv::Mat(intrin, true);
+}
+
+cv::Mat KittiOdom::ReadTimes(const std::string& file) const {
+  std::ifstream ifs{file};
+  CHECK(ifs.good()) << "Unable to open file: " << file;
+
+  std::vector<double> data;
+  data.reserve(static_cast<size_t>(size_));
+
+  std::string line;
+  while (std::getline(ifs, line)) {
+    std::istringstream iss(line);
+    double timestamp;
+    iss >> timestamp;
+    data.push_back(timestamp);
+  }
+
+  return cv::Mat(data, true);
 }
 
 cv::Mat KittiOdom::ReadPoses(const std::string& file) const {

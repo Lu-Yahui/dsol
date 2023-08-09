@@ -183,6 +183,11 @@ cc_binary(
   SRCS "odom_play.cpp"
   DEPS sv_dsol_odom sv_dsol_extra sv_util_dataset absl::flags_parse)
 
+cc_binary(
+  NAME dsol_odom_kitti
+  SRCS "odom_kitti.cpp"
+  DEPS sv_dsol_odom sv_dsol_extra sv_util_dataset absl::flags_parse yaml-cpp)
+
 if(BUILD_PLAY)
   cc_binary(
     NAME dsol_select_play

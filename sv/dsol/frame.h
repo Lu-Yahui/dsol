@@ -79,6 +79,9 @@ struct Frame {
   using Vector10d = ErrorState::Vector10d;
   using Vector10dCRef = ErrorState::Vector10dCRef;
 
+  cv::Mat color_l_;
+  cv::Mat color_r_;
+
   // images
   ImagePyramid grays_l_;
   ImagePyramid grays_r_;
@@ -114,6 +117,8 @@ struct Frame {
   const ImagePyramid& grays_l() const noexcept { return grays_l_; }
   const ImagePyramid& grays_r() const noexcept { return grays_r_; }
   const cv::Mat& gray_l() const noexcept { return grays_l_.front(); }
+  const cv::Mat& color_l() const noexcept { return color_l_; }
+  const cv::Mat& color_r() const noexcept { return color_r_; }
 
   FrameState& state() noexcept { return state_; }
   const FrameState& state() const noexcept { return state_; }
@@ -123,6 +128,7 @@ struct Frame {
   void SetGrays(const ImagePyramid& grays_l, const ImagePyramid& grays_r = {});
   void SetTwc(const Sophus::SE3d& T_w_cl) noexcept { state_.T_w_cl = T_w_cl; }
   void SetState(const FrameState& state) noexcept { state_ = state; }
+  void SetColors(const cv::Mat& color_l, const cv::Mat& color_r = {});
   virtual void UpdateState(const Vector10dCRef& dx) noexcept {
     state_ += ErrorState{dx};
   }

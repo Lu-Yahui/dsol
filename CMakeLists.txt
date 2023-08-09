@@ -4,8 +4,8 @@ project(dsol)
 set(CMAKE_CXX_STANDARD 17)
 list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-option(BUILD_ROS "Build ros" ON)
-option(BUILD_PLAY "Build play" OFF)
+option(BUILD_ROS "Build ros" OFF)
+option(BUILD_PLAY "Build play" ON)
 option(BUILD_TESTING "Build tests" OFF)
 option(BUILD_BENCHMARK "Build benchmarks" OFF)
 option(BUILD_VECTORIZE "Build with -march=native" ON)
@@ -39,10 +39,11 @@ find_package(Boost REQUIRED) # circular buffer
 find_package(Eigen3 REQUIRED)
 find_package(Sophus REQUIRED)
 find_package(OpenCV REQUIRED)
-find_package(xtensor) # reading npy
+find_package(xtensor QUIET) # reading npy
 
 find_package(GTest REQUIRED)
 find_package(benchmark REQUIRED)
+find_package(yaml-cpp REQUIRED)
 
 if(NOT catkin_FOUND)
   set(BUILD_ROS OFF)

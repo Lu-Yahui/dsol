@@ -162,9 +162,16 @@ int StereoMatcher::MatchRefine(const cv::Mat& gray0,
           // Scale pixel to this level
           const auto pxi = RoundPix(ScalePix(point.px(), scale));
 
-          CHECK(!IsPixOut(gray0,
-                          pxi + cv::Point(cfg_.refine_size, 0),
-                          cfg_.half_patch_size()));
+          if (IsPixOut(gray0,
+                       pxi + cv::Point(cfg_.refine_size, 0),
+                       cfg_.half_patch_size())) {
+            prev_disp = -1;
+            ++n_removed;
+            continue;
+          }
+          // CHECK(!IsPixOut(gray0,
+          //                 pxi + cv::Point(cfg_.refine_size, 0),
+          //                 cfg_.half_patch_size()));
 
           const auto range = cfg_.refine_range(prev_disp * 2);
           const auto best = BestMatch(pxi, range, gray0, gray1, patch0, patch1);

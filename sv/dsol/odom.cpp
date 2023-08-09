@@ -187,6 +187,7 @@ TrackStatus DirectOdometry::Track(const cv::Mat& image_l,
   // Note that this uses the same storage as grays_l and grays_r
   frame.SetGrays(grays_l, grays_r);
   frame.SetTwc(frame.Twc() * dT);
+  frame.SetColors(image_l, image_r);
 
   // Get a copy of the current (predicted) state if alignment failed
   const FrameState init_state = frame.state();

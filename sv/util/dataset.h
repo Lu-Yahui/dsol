@@ -41,6 +41,7 @@ struct DataType {
   inline static const std::string kDepth = "depth";
   inline static const std::string kIntrin = "intrin";
   inline static const std::string kPose = "pose";
+  inline static const std::string kTime = "time";
 };
 
 // Data retrieving function, takes index and returns cv::Mat
@@ -185,9 +186,17 @@ class KittiOdom final : public DatasetBase {
   static constexpr int kNumCams = 2;
   // Default data types for this dataset
   inline static const std::vector<std::string> kDtypes = {
-      DataType::kImage, DataType::kIntrin, DataType::kPose};
+      DataType::kImage, DataType::kIntrin, DataType::kPose, DataType::kTime};
 
   explicit KittiOdom(const std::string& data_dir);
+
+  KittiOdom(const std::string& data_dir,
+            const std::string& left_image_sub_dir,
+            const std::string& right_image_sub_dir,
+            const std::string& calib_sub_dir,
+            const std::string& pose_dir,
+            const std::string& time_dir);
+
   static KittiOdom Create(const std::string& base_dir, int seq);
 
  private:
@@ -198,6 +207,7 @@ class KittiOdom final : public DatasetBase {
   cv::Mat ReadIntrinsics(const std::string& file);
   cv::Mat ReadPoses(const std::string& file) const;
   cv::Mat ConvertPoses(const cv::Mat& poses) const;
+  cv::Mat ReadTimes(const std::string& file) const;
 
   double baseline_{};
 };
